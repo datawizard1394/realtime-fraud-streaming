@@ -1,0 +1,26 @@
+{
+  "allowed_lateness_seconds": 30,
+  "late_event_policy": "drop",
+  "state_retention_seconds": 900,
+  "alert_score_threshold": 50,
+  "rules": {
+    "high_amount": {
+      "enabled": true,
+      "threshold": 1200.0,
+      "score": 55
+    },
+    "velocity": {
+      "enabled": true,
+      "window_seconds": 60,
+      "count_threshold": 5,
+      "amount_threshold": 2500.0,
+      "score": 40
+    },
+    "country_hop": {
+      "enabled": true,
+      "window_seconds": 300,
+      "score": 50
+    }
+  }
+}
+
