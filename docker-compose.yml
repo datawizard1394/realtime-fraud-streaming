@@ -1,0 +1,39 @@
+services:
+  demo:
+    build:
+      context: .
+    command:
+      - --config
+      - config/rules.json
+      - --events
+      - "100"
+      - --seed
+      - "42"
+      - --output-dir
+      - /tmp/artifacts
+
+  # Illustrative broker only. The dependency-free local demo does not require it.
+  # Start with: docker compose --profile broker up redpanda
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.18
+    profiles: ["broker"]
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+
