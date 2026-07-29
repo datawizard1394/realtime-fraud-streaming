@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install package
+        run: python -m pip install .
+      - name: Compile and test
+        run: make check
+      - name: Run deterministic demo
+        run: fraud-stream-demo --events 25 --seed 42 --output-dir artifacts
+      - name: Upload demo evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-demo-python-${{ matrix.python-version }}
+          path: artifacts/
+          if-no-files-found: warn
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build demo image
+        run: docker build --tag fraud-streaming-demo:${{ github.sha }} .
+      - name: Run demo image
+        run: docker run --rm fraud-streaming-demo:${{ github.sha }} --events 10 --seed 7 --output-dir /tmp/artifacts
+
